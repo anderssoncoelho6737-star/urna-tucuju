@@ -52,10 +52,8 @@
         button.btn-primary { background-color: #27ae60; color: white; border: none; padding: 12px 20px; font-size: 18px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
         button.btn-primary:hover { background-color: #219653; }
 
-        /* Container da Urna com Marca Superior */
         .urna-wrapper { display: flex; background-color: var(--urna-bg); padding: 25px; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3); border: 4px solid #ccc; gap: 20px; flex-wrap: wrap; position: relative; padding-top: 65px; }
         
-        /* Area da Marca Logo no Topo Centralizado da Urna */
         .urna-marca-topo { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); height: 45px; display: flex; align-items: center; justify-content: center; max-width: 80%; }
         .urna-marca-topo img { height: 100%; object-fit: contain; }
         .urna-marca-topo span { font-weight: bold; font-size: 16px; color: #555; font-style: italic; letter-spacing: 1px; }
@@ -109,56 +107,67 @@
         .marca-cadastro img { height: 100%; object-fit: contain; }
     </style>
 
-    <!-- Compatibilidade Firebase CDN Legado -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-</head>
-<body>
+    <!-- Chamadas Seguras Modernas via Módulo Isolado (Garante que nenhum erro trave o HTML) -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://gstatic.com";
 
-    <div id="tela-cadastro" class="container">
-        <!-- Logo na Tela de Cadastro -->
-        <div id="cadastro-logo-container" class="marca-cadastro hidden"></div>
-        <h1>🗳️ Urna Eletrônica Escolar - Amapá</h1>
-        <h2>Cadastro do Professor e da Turma</h2>
-        <form id="form-cadastro" onsubmit="salvarCadastro(event)">
-            <div class="form-group">
-                <label>Nome do Professor:</label>
-                <input type="text" id="cad-professor" required placeholder="Ex: Prof. Silva">
-            </div>
-            <div class="form-group">
-                <label>Turma / Ano:</label>
-                <input type="text" id="cad-turma" required placeholder="Ex: 5º Ano A">
-            </div>
-            <div class="form-group">
-                <label>Escola:</label>
-                <input type="text" id="cad-escola" required placeholder="Ex: Escola Estadual Tiradentes">
-            </div>
-            <div class="form-group">
-                <label>Município do Amapá:</label>
-                <select id="cad-municipio" required>
-                    <option value="">Selecione o município...</option>
-                    <option value="Amapá">Amapá</option>
-                    <option value="Calçoene">Calçoene</option>
-                    <option value="Cutias">Cutias</option>
-                    <option value="Ferreira Gomes">Ferreira Gomes</option>
-                    <option value="Itaubal">Itaubal</option>
-                    <option value="Laranjal do Jari">Laranjal do Jari</option>
-                    <option value="Macapá">Macapá</option>
-                    <option value="Mazagão">Mazagão</option>
-                    <option value="Oiapoque">Oiapoque</option>
-                    <option value="Pedra Branca do Amapari">Pedra Branca do Amapari</option>
-                    <option value="Porto Grande">Porto Grande</option>
-                    <option value="Pracuúba">Pracuúba</option>
-                    <option value="Santana">Santana</option>
-                    <option value="Serra do Navio">Serra do Navio</option>
-                    <option value="Tartarugalzinho">Tartarugalzinho</option>
-                    <option value="Vitória do Jari">Vitória do Jari</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-primary">Iniciar Urna para Votação</button>
-        </form>
-    </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcD5KbA9M8u7gb9Dj3G-pORjmhCRpwuts",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebaseio.com",
+            projectId: "urna-eletronica-amapa",
+            storageBucket: "urna-eletronica-amapa.firebasestorage.app",
+            messagingSenderId: "183402441698",
+            appId: "1:183402441698:web:ec2a8138e06c058d3167bb"
+        };
 
-    <div id="tela-urna" class="container hidden" style="max-width: 850px;">
-        <h3 style="margin-bottom: 15px;" id="urna-cabecalho-escola">Escola - Turma</h3>
-        <div class="urna-wrapper">
+        // Inicialização Protegida do Banco
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+        } catch(e) { console.error("Conectando ao banco..."); }
+
+        // Sincronização em Tempo Real (Só roda se os elementos já existirem na tela)
+        if (db) {
+            onValue(ref(db, "configuracoes/imagens"), (snapshot) => {
+                window.imagensCandidatos = snapshot.val() || {};
+                window.renderizarConfigFotos();
+                window.atualizarTelaUrna();
+            });
+
+            onValue(ref(db, "configuracoes/logo_marca"), (snapshot) => {
+                window.logoMarcaBase64 = snapshot.val() || "";
+                window.atualizarLogoVisual();
+            });
+        }
+
+        // Função de envio seguro para a nuvem
+        window.transmitirVotosNuvem = function(dadosSessao, callbackSucesso) {
+            if (db) {
+                push(ref(db, "historico_votos"), dadosSessao)
+                    .then(() => { callbackSucesso(); })
+                    .catch(() => { alert("Votos computados localmente devido à oscilação de rede."); callbackSucesso(); });
+            } else { callbackSucesso(); }
+        };
+
+        window.transmitirFotoNuvem = function(num, base64) {
+            if (db) {
+                set(ref(db, `configuracoes/imagens/${num}`), base64)
+                    .then(() => { alert("Foto salva na nuvem com sucesso!"); })
+                    .catch(() => { alert("Erro de rede ao salvar imagem."); });
+            }
+        };
+
+        window.transmitirLogoNuvem = function(base64) {
+            if (db) {
+                set(ref(db, "configuracoes/logo_marca"), base64)
+                    .then(() => { alert("Logo do Professor Tucuju atualizado na nuvem com sucesso!"); })
+                    .catch(() => { alert("Erro ao sincronizar logo marca."); });
+            }
+        };
+
+        window.escutarHistoricoGlobal = function(callbackAtualizar) {
+            if (db) {
+                onValue(ref(db, "historico_votos"), (snapshot) => {
