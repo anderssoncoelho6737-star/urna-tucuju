@@ -107,7 +107,7 @@
         .marca-cadastro img { height: 100%; object-fit: contain; }
     </style>
 
-    <!-- Chamadas Seguras Modernas via Módulo Isolado (Garante que nenhum erro trave o HTML) -->
+    <!-- Chamadas Seguras Modernas via Módulo Isolado -->
     <script type="module">
         import { initializeApp } from "https://gstatic.com";
         import { getDatabase, ref, set, push, onValue, remove } from "https://gstatic.com";
@@ -122,14 +122,12 @@
             appId: "1:183402441698:web:ec2a8138e06c058d3167bb"
         };
 
-        // Inicialização Protegida do Banco
         let db;
         try {
             const app = initializeApp(firebaseConfig);
             db = getDatabase(app);
         } catch(e) { console.error("Conectando ao banco..."); }
 
-        // Sincronização em Tempo Real (Só roda se os elementos já existirem na tela)
         if (db) {
             onValue(ref(db, "configuracoes/imagens"), (snapshot) => {
                 window.imagensCandidatos = snapshot.val() || {};
@@ -143,31 +141,47 @@
             });
         }
 
-        // Função de envio seguro para a nuvem
         window.transmitirVotosNuvem = function(dadosSessao, callbackSucesso) {
             if (db) {
                 push(ref(db, "historico_votos"), dadosSessao)
                     .then(() => { callbackSucesso(); })
-                    .catch(() => { alert("Votos computados localmente devido à oscilação de rede."); callbackSucesso(); });
+                    .catch(() => { callbackSucesso(); });
             } else { callbackSucesso(); }
         };
 
         window.transmitirFotoNuvem = function(num, base64) {
             if (db) {
-                set(ref(db, `configuracoes/imagens/${num}`), base64)
-                    .then(() => { alert("Foto salva na nuvem com sucesso!"); })
-                    .catch(() => { alert("Erro de rede ao salvar imagem."); });
+                set(ref(db, `configuracoes/imagens/${num}`), base64);
             }
         };
 
         window.transmitirLogoNuvem = function(base64) {
             if (db) {
-                set(ref(db, "configuracoes/logo_marca"), base64)
-                    .then(() => { alert("Logo do Professor Tucuju atualizado na nuvem com sucesso!"); })
-                    .catch(() => { alert("Erro ao sincronizar logo marca."); });
+                set(ref(db, "configuracoes/logo_marca"), base64);
             }
         };
 
         window.escutarHistoricoGlobal = function(callbackAtualizar) {
             if (db) {
                 onValue(ref(db, "historico_votos"), (snapshot) => {
+                    callbackAtualizar(snapshot.val() || {});
+                });
+            }
+        };
+
+        window.removerVotosNuvem = function() {
+            if (db) {
+                remove(ref(db, "historico_votos")).then(() => { location.reload(); });
+            } else { location.reload(); }
+        };
+    </script>
+</head>
+<body>
+
+    <div id="tela-cadastro" class="container">
+        <div id="cadastro-logo-container" class="marca-cadastro hidden"></div>
+        <h1>🗳️ Urna Eletrônica Escolar - Amapá</h1>
+        <h2>Cadastro do Professor e da Turma</h2>
+        <form id="form-cadastro" onsubmit="salvarCadastro(event)">
+            <div class="form-group">
+                <label>Nome do Professor:</label>
