@@ -52,7 +52,14 @@
         button.btn-primary { background-color: #27ae60; color: white; border: none; padding: 12px 20px; font-size: 18px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
         button.btn-primary:hover { background-color: #219653; }
 
-        .urna-wrapper { display: flex; background-color: var(--urna-bg); padding: 25px; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3); border: 4px solid #ccc; gap: 20px; flex-wrap: wrap; }
+        /* Container da Urna com Marca Superior */
+        .urna-wrapper { display: flex; background-color: var(--urna-bg); padding: 25px; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3); border: 4px solid #ccc; gap: 20px; flex-wrap: wrap; position: relative; padding-top: 65px; }
+        
+        /* Area da Marca Logo no Topo Centralizado da Urna */
+        .urna-marca-topo { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); height: 45px; display: flex; align-items: center; justify-content: center; max-width: 80%; }
+        .urna-marca-topo img { height: 100%; object-fit: contain; }
+        .urna-marca-topo span { font-weight: bold; font-size: 16px; color: #555; font-style: italic; letter-spacing: 1px; }
+
         .tela-container { flex: 1; min-width: 320px; background-color: var(--tela-bg); border: 2px solid #888; height: 380px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
         .teclado { width: 280px; background-color: var(--teclado-bg); padding: 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 15px; margin: 0 auto; }
         .teclado-justica { color: #fff; text-align: center; font-size: 14px; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; }
@@ -98,58 +105,60 @@
         .footer-links a { color: #fff; text-decoration: underline; cursor: pointer; font-weight: bold; }
 
         .box-destaque { background: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; border-radius: 4px; margin-top: 20px; font-size: 15px; line-height: 1.5; }
+        .marca-cadastro { display: flex; justify-content: center; margin-bottom: 15px; height: 60px; }
+        .marca-cadastro img { height: 100%; object-fit: contain; }
     </style>
 
-    <!-- Importação Direta e Compatível com Todos os Navegadores do Firebase v9 via CDN Clássico -->
+    <!-- Compatibilidade Firebase CDN Legado -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
+</head>
+<body>
 
-    <script>
-        // Suas chaves de configuração oficiais integradas
-        const firebaseConfig = {
-            apiKey: "AIzaSyAcD5KbA9M8u7gb9Dj3G-pORjmhCRpwuts",
-            authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebaseio.com",
-            projectId: "urna-eletronica-amapa",
-            storageBucket: "urna-eletronica-amapa.firebasestorage.app",
-            messagingSenderId: "183402441698",
-            appId: "1:183402441698:web:ec2a8138e06c058d3167bb"
-        };
+    <div id="tela-cadastro" class="container">
+        <!-- Logo na Tela de Cadastro -->
+        <div id="cadastro-logo-container" class="marca-cadastro hidden"></div>
+        <h1>🗳️ Urna Eletrônica Escolar - Amapá</h1>
+        <h2>Cadastro do Professor e da Turma</h2>
+        <form id="form-cadastro" onsubmit="salvarCadastro(event)">
+            <div class="form-group">
+                <label>Nome do Professor:</label>
+                <input type="text" id="cad-professor" required placeholder="Ex: Prof. Silva">
+            </div>
+            <div class="form-group">
+                <label>Turma / Ano:</label>
+                <input type="text" id="cad-turma" required placeholder="Ex: 5º Ano A">
+            </div>
+            <div class="form-group">
+                <label>Escola:</label>
+                <input type="text" id="cad-escola" required placeholder="Ex: Escola Estadual Tiradentes">
+            </div>
+            <div class="form-group">
+                <label>Município do Amapá:</label>
+                <select id="cad-municipio" required>
+                    <option value="">Selecione o município...</option>
+                    <option value="Amapá">Amapá</option>
+                    <option value="Calçoene">Calçoene</option>
+                    <option value="Cutias">Cutias</option>
+                    <option value="Ferreira Gomes">Ferreira Gomes</option>
+                    <option value="Itaubal">Itaubal</option>
+                    <option value="Laranjal do Jari">Laranjal do Jari</option>
+                    <option value="Macapá">Macapá</option>
+                    <option value="Mazagão">Mazagão</option>
+                    <option value="Oiapoque">Oiapoque</option>
+                    <option value="Pedra Branca do Amapari">Pedra Branca do Amapari</option>
+                    <option value="Porto Grande">Porto Grande</option>
+                    <option value="Pracuúba">Pracuúba</option>
+                    <option value="Santana">Santana</option>
+                    <option value="Serra do Navio">Serra do Navio</option>
+                    <option value="Tartarugalzinho">Tartarugalzinho</option>
+                    <option value="Vitória do Jari">Vitória do Jari</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-primary">Iniciar Urna para Votação</button>
+        </form>
+    </div>
 
-        // Inicialização Global
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        const candidatosIniciais = {
-            "10": { nome: "Fortaleza de São José", info: "Monumental fortificação militar construída no século XVIII às margens do Rio Amazonas." },
-            "20": { nome: "Marco Zero do Equador", info: "Famoso monumento que marca a linha imaginária que divide o planeta nos dois hemisférios." },
-            "30": { nome: "Museu Sacaca", info: "Espaço cultural vivo que valoriza e difunde a ciência e a tradição dos povos da Amazônia." },
-            "40": { nome: "Parque do Meio do Mundo", info: "Novo complexo de lazer, turismo e convivência ao redor do monumento do Equador." },
-            "50": { nome: "Praça Jaci Barata", info: "Revitalizada orla com espaços de esporte, cultura e contemplação do pôr do sol amapaense." }
-        };
-
-        let imagensCandidatos = {};
-        
-        // Escuta em tempo real do banco de dados na nuvem
-        db.ref("configuracoes/imagens").on("value", (snapshot) => {
-            imagensCandidatos = snapshot.val() || {};
-            renderizarConfigFotos();
-            atualizarTelaUrna();
-        });
-
-        let sessaoAtual = { professor: "", turma: "", escola: "", municipio: "", votos: { "10": 0, "20": 0, "30": 0, "40": 0, "50": 0, "Branco": 0, "Nulo": 0 } };
-        let numeroDigitado = "";
-        let votoEmBranco = false;
-
-        const AudioUrna = {
-            ctx: null,
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-            playBeep() { this.init(); let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(1400, this.ctx.currentTime); gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1); },
-            playFim() { this.init(); let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(880, this.ctx.currentTime); gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 1.2); }
-        };
-
-        function alternarTela(idTela) {
-            document.getElementById("tela-cadastro").classList.add("hidden");
-            document.getElementById("tela-urna").classList.add("hidden");
-            document.getElementById("tela-resultado-turma").classList.add("hidden");
-            document.getElementById("tela-admin").classList.add("hidden");
+    <div id="tela-urna" class="container hidden" style="max-width: 850px;">
+        <h3 style="margin-bottom: 15px;" id="urna-cabecalho-escola">Escola - Turma</h3>
+        <div class="urna-wrapper">
