@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urna Eletrônica Tucuju - Amapá</title>
+    <style>
+        :root {
+            --urna-bg: #e6e6e6;
+            --teclado-bg: #222;
+            --botao-branco: #fff;
+            --botao-corrige: #f39c12;
+            --botao-confirma: #27ae60;
+            --tela-bg: #fff;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1e3c72;
+            background-image: linear-gradient(to right, #1e3c72, #2a5298);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #1e3c72;
+            margin-top: 0;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Form Estilos */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        button.btn-primary { background-color: #27ae60; color: white; border: none; padding: 12px 20px; font-size: 18px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
+        button.btn-primary:hover { background-color: #219653; }
+
+        /* Urna Layout */
+        .urna-wrapper { display: flex; background-color: var(--urna-bg); padding: 25px; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3); border: 4px solid #ccc; gap: 20px; flex-wrap: wrap; }
+        .tela-container { flex: 1; min-width: 320px; background-color: var(--tela-bg); border: 2px solid #888; height: 380px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
+        .teclado { width: 280px; background-color: var(--teclado-bg); padding: 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 15px; margin: 0 auto; }
+        .teclado-justica { color: #fff; text-align: center; font-size: 14px; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .teclado-linhas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; justify-items: center; }
+
+        .btn-num { width: 60px; height: 45px; background-color: #333; color: #fff; font-size: 22px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; box-shadow: 0 4px #111; }
+        .btn-num:active { box-shadow: 0 1px #111; transform: translateY(3px); }
+
+        .teclado-acoes { display: flex; justify-content: space-between; gap: 8px; }
+        .btn-acao { flex: 1; padding: 12px 5px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: none; border-radius: 4px; cursor: pointer; box-shadow: 0 3px rgba(0,0,0,0.3); }
+        .btn-acao:active { transform: translateY(2px); box-shadow: 0 1px rgba(0,0,0,0.3); }
+        .btn-branco { background-color: var(--botao-branco); color: #000; }
+        .btn-corrige { background-color: var(--botao-corrige); color: #000; }
+        .btn-confirma { background-color: var(--botao-confirma); color: #fff; height: 55px; margin-top: -10px; font-size: 13px; }
+
+        /* Infos da Tela */
+        .tela-header { font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .tela-cargo { font-size: 18px; font-weight: bold; text-align: center; margin: 10px 0; }
+        .tela-inputs { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
+        .digit-box { width: 30px; height: 40px; border: 2px solid #000; font-size: 26px; text-align: center; line-height: 40px; font-weight: bold; }
+        
+        .candidato-info { display: flex; gap: 15px; margin-top: 10px; height: 200px; }
+        .candidato-detalhes { flex: 1; font-size: 14px; }
+        .candidato-foto-container { width: 130px; height: 160px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; background-color: #fafafa; overflow: hidden; }
+        .candidato-foto-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .tela-footer { border-top: 1px solid #777; font-size: 11px; padding-top: 5px; position: absolute; bottom: 10px; left: 15px; right: 15px; }
+        .tela-fim { display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; height: 100%; color: #000; }
+
+        /* Abas Admin */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border: 1px solid #ccc; background: #eee; cursor: pointer; font-weight: bold; border-radius: 6px; }
+        .tab-btn.active { background: #1e3c72; color: white; border-color: #1e3c72; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+
+        .config-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-badge.success { background-color: #d4edda; color: #155724; }
+        .status-badge.danger { background-color: #f8d7da; color: #721c24; }
+
+        .footer-links { margin-top: 20px; display: flex; gap: 20px; font-size: 14px; }
+        .footer-links a { color: #fff; text-decoration: underline; cursor: pointer; font-weight: bold; }
+
+        .box-destaque { background: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; border-radius: 4px; margin-top: 20px; font-size: 15px; line-height: 1.5; }
+    </style>
+
+    <!-- Módulos do Firebase (SDKs Web Estáveis v10) -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://gstatic.com";
+
+        // Suas chaves de configuração oficiais integradas
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcD5KbA9M8u7gb9Dj3G-pORjmhCRpwuts",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebaseio.com",
+            projectId: "urna-eletronica-amapa",
+            storageBucket: "urna-eletronica-amapa.firebasestorage.app",
+            messagingSenderId: "183402441698",
+            appId: "1:183402441698:web:ec2a8138e06c058d3167bb"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Candidatos Oficiais Fixos
+        const candidatosIniciais = {
+            "10": { nome: "Fortaleza de São José", info: "Monumental fortificação militar construída no século XVIII às margens do Rio Amazonas." },
+            "20": { nome: "Marco Zero do Equador", info: "Famoso monumento que marca a linha imaginária que divide o planeta nos dois hemisférios." },
+            "30": { nome: "Museu Sacaca", info: "Espaço cultural vivo que valoriza e difunde a ciência e a tradição dos povos da Amazônia." },
+            "40": { nome: "Parque do Meio do Mundo", info: "Novo complexo de lazer, turismo e convivência ao redor do monumento do Equador." },
+            "50": { nome: "Praça Jaci Barata", info: "Revitalizada orla com espaços de esporte, cultura e contemplação do pôr do sol amapaense." }
+        };
+
+        // Cache local de imagens sincronizado com o Firebase
+        let imagensCandidatos = {};
+        onValue(ref(db, "configuracoes/imagens"), (snapshot) => {
+            imagensCandidatos = snapshot.val() || {};
+            renderizarConfigFotos();
+            atualizarTelaUrna();
+        });
+
+        let sessaoAtual = { professor: "", turma: "", escola: "", municipio: "", votos: { "10": 0, "20": 0, "30": 0, "40": 0, "50": 0, "Branco": 0, "Nulo": 0 } };
+        let numeroDigitado = "";
+        let votoEmBranco = false;
+
+        const AudioUrna = {
+            ctx: null,
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            playBeep() { this.init(); let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(1400, this.ctx.currentTime); gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.1); },
+            playFim() { this.init(); let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(880, this.ctx.currentTime); gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 1.2); }
+        };
+
+        function alternarTela(idTela) {
+            document.getElementById("tela-cadastro").classList.add("hidden");
+            document.getElementById("tela-urna").classList.add("hidden");
+            document.getElementById("tela-resultado-turma").classList.add("hidden");
+            document.getElementById("tela-admin").classList.add("hidden");
+            document.getElementById("link-encerrar-voto").classList.add("hidden");
