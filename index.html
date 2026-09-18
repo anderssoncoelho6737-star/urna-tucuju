@@ -100,11 +100,12 @@
         .box-destaque { background: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; border-radius: 4px; margin-top: 20px; font-size: 15px; line-height: 1.5; }
     </style>
 
-    <!-- Inicialização Correta e Blindada dos Módulos do Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getDatabase, ref, set, push, onValue, remove } from "https://gstatic.com";
+    <!-- Importação Direta e Compatível com Todos os Navegadores do Firebase v9 via CDN Clássico -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 
+    <script>
+        // Suas chaves de configuração oficiais integradas
         const firebaseConfig = {
             apiKey: "AIzaSyAcD5KbA9M8u7gb9Dj3G-pORjmhCRpwuts",
             authDomain: "://firebaseapp.com",
@@ -115,8 +116,9 @@
             appId: "1:183402441698:web:ec2a8138e06c058d3167bb"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        // Inicialização Global
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         const candidatosIniciais = {
             "10": { nome: "Fortaleza de São José", info: "Monumental fortificação militar construída no século XVIII às margens do Rio Amazonas." },
@@ -128,7 +130,8 @@
 
         let imagensCandidatos = {};
         
-        onValue(ref(db, "configuracoes/imagens"), (snapshot) => {
+        // Escuta em tempo real do banco de dados na nuvem
+        db.ref("configuracoes/imagens").on("value", (snapshot) => {
             imagensCandidatos = snapshot.val() || {};
             renderizarConfigFotos();
             atualizarTelaUrna();
@@ -145,10 +148,8 @@
             playFim() { this.init(); let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(880, this.ctx.currentTime); gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 1.2); }
         };
 
-        window.alternarTela = function(idTela) {
+        function alternarTela(idTela) {
             document.getElementById("tela-cadastro").classList.add("hidden");
             document.getElementById("tela-urna").classList.add("hidden");
             document.getElementById("tela-resultado-turma").classList.add("hidden");
             document.getElementById("tela-admin").classList.add("hidden");
-            document.getElementById("link-encerrar-voto").classList.add("hidden");
-            document.getElementById("link-voltar-cadastro").classList.add("hidden");
